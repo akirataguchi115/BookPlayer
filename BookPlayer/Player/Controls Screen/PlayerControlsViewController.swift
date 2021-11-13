@@ -31,6 +31,7 @@ class PlayerControlsViewController: BaseViewController<PlayerControlsCoordinator
     super.viewDidLoad()
 
     self.setupUI()
+    self.setupAccessibility()
     self.bindObservers()
 
     self.setUpTheming()
@@ -50,6 +51,17 @@ class PlayerControlsViewController: BaseViewController<PlayerControlsCoordinator
     self.mainContainterStackView.setCustomSpacing(5, after: self.boostContainerStackView)
 
     self.boostSwitchControl.setOn(self.viewModel.getBoostVolumeFlag(), animated: false)
+  }
+
+  func setupAccessibility() {
+    if let playbackContainerStackView = self.playbackContainerStackView,
+        let boostContainerStackView = self.boostContainerStackView {
+      self.mainContainterStackView.accessibilityElements = [playbackContainerStackView,
+                                                            boostContainerStackView]
+    }
+
+    self.boostLabel.accessibilityHint = "settings_boostvolume_description".localized
+    self.boostWarningLabel.isAccessibilityElement = false
   }
 
   func bindObservers() {
