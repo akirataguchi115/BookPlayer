@@ -11,10 +11,13 @@ import BookPlayerKit
 
 class PlayerControlsCoordinator: Coordinator {
   let playerManager: PlayerManager
+  let dataManager: DataManager
 
   init(navigationController: UINavigationController,
-       playerManager: PlayerManager) {
+       playerManager: PlayerManager,
+       dataManager: DataManager) {
     self.playerManager = playerManager
+    self.dataManager = dataManager
 
     super.init(navigationController: navigationController,
                flowType: .modal)
@@ -22,7 +25,8 @@ class PlayerControlsCoordinator: Coordinator {
 
   override func start() {
     let vc = PlayerControlsViewController.instantiate(from: .Player)
-    let viewModel = PlayerControlsViewModel(playerManager: self.playerManager)
+    let viewModel = PlayerControlsViewModel(playerManager: self.playerManager,
+                                            dataManager: self.dataManager)
     viewModel.coordinator = self
     vc.viewModel = viewModel
 

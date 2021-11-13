@@ -54,7 +54,8 @@ class PlayerCoordinator: Coordinator {
 
   func showControls() {
     let playerControlsCoordinator = PlayerControlsCoordinator(navigationController: self.navigationController,
-                                                              playerManager: self.playerManager)
+                                                              playerManager: self.playerManager,
+                                                              dataManager: self.dataManager)
     playerControlsCoordinator.parentCoordinator = self
     playerControlsCoordinator.presentingViewController = self.presentingViewController
     self.childCoordinators.append(playerControlsCoordinator)

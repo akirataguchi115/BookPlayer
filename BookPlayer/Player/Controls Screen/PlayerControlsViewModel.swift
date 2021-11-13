@@ -12,9 +12,12 @@ import Foundation
 
 class PlayerControlsViewModel: BaseViewModel<PlayerControlsCoordinator> {
   let playerManager: PlayerManager
+  let dataManager: DataManager
 
-  init(playerManager: PlayerManager) {
+  init(playerManager: PlayerManager,
+       dataManager: DataManager) {
     self.playerManager = playerManager
+    self.dataManager = dataManager
   }
 
   func currentSpeedPublisher() -> AnyPublisher<Float, Never> {
@@ -47,6 +50,7 @@ class PlayerControlsViewModel: BaseViewModel<PlayerControlsCoordinator> {
     let roundedValue = round(newValue * 100) / 100.0
 
     SpeedManager.shared.setSpeed(Float(roundedValue), currentBook: self.playerManager.currentBook)
+    self.dataManager.saveContext()
   }
 
   func dismiss() {
