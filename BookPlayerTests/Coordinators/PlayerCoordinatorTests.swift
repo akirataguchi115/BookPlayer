@@ -40,4 +40,9 @@ class PlayerCoordinatorTests: XCTestCase {
     self.playerCoordinator.showChapters()
     XCTAssert(self.playerCoordinator.childCoordinators.first is ChapterCoordinator)
   }
+
+  func testShowControls() {
+    self.playerCoordinator.showControls()
+    XCTAssert(self.playerCoordinator.childCoordinators.first is PlayerControlsCoordinator)
+  }
 }

@@ -14,7 +14,8 @@ class SpeedManager: NSObject {
   static let shared = SpeedManager()
 
   var subscription: AnyCancellable?
-  let speedOptions: [Float] = [3, 2.5, 2, 1.75, 1.5, 1.25, 1.15, 1.1, 1, 0.9, 0.75, 0.5]
+  let minimumSpeed: Double = 0.5
+  let maximumSpeed: Double = 3.0
 
   public private(set) var currentSpeed = CurrentValueSubject<Float, Never>(1.0)
 

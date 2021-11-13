@@ -20,9 +20,7 @@ class PlayerViewController: BaseViewController<PlayerCoordinator, PlayerViewMode
   @IBOutlet private weak var closeButtonTop: NSLayoutConstraint!
   @IBOutlet private weak var bottomToolbar: UIToolbar!
   @IBOutlet weak var toolbarBottomConstraint: NSLayoutConstraint!
-  @IBOutlet private weak var speedButton: UIBarButtonItem!
-  @IBOutlet private weak var sleepButton: UIBarButtonItem!
-  @IBOutlet private var sleepLabel: UIBarButtonItem!
+  @IBOutlet private var playerControlsBarItem: UIBarButtonItem!
   @IBOutlet private var chaptersButton: UIBarButtonItem!
   @IBOutlet private var bookmarkButton: UIBarButtonItem!
   @IBOutlet private weak var moreButton: UIBarButtonItem!
@@ -40,6 +38,7 @@ class PlayerViewController: BaseViewController<PlayerCoordinator, PlayerViewMode
   @IBOutlet weak var forwardIconView: PlayerJumpIconForward!
   @IBOutlet weak var containerItemStackView: UIStackView!
 
+  private let playerControlsButton = PlayerControlsButton(title: "1x")
   private var themedStatusBarStyle: UIStatusBarStyle?
   private var panGestureRecognizer: UIPanGestureRecognizer!
   private let dismissThreshold: CGFloat = 44.0 * UIScreen.main.nativeScale
@@ -262,25 +261,14 @@ extension PlayerViewController {
 
   func bindTimerObserver() {
     SleepTimer.shared.timeLeftFormatted.sink { timeFormatted in
-      self.sleepLabel.title = timeFormatted
+      guard let timeFormatted = timeFormatted else { return }
 
-      if let timeFormatted = timeFormatted {
-        self.sleepLabel.isAccessibilityElement = true
-        let remainingTitle = String(describing: String.localizedStringWithFormat("sleep_remaining_title".localized, timeFormatted))
-        self.sleepLabel.accessibilityLabel = String(describing: remainingTitle)
+      self.playerControlsButton.setCustomTitle(title: timeFormatted)
+      let remainingTitle = String(
+        describing: String.localizedStringWithFormat("sleep_remaining_title".localized, timeFormatted)
+      )
+      self.playerControlsBarItem.accessibilityLabel = String(describing: remainingTitle)
 
-        if let items = self.bottomToolbar.items,
-           !items.contains(self.sleepLabel) {
-          self.updateToolbar(true, animated: true)
-        }
-      } else {
-        self.sleepLabel.isAccessibilityElement = false
-
-        if let items = self.bottomToolbar.items,
-           items.contains(self.sleepLabel) {
-          self.updateToolbar(false, animated: true)
-        }
-      }
     }.store(in: &disposeBag)
   }
 
@@ -320,8 +308,8 @@ extension PlayerViewController {
     SpeedManager.shared.currentSpeed.sink { [weak self] speed in
       guard let self = self else { return }
 
-      self.speedButton.title = self.formatSpeed(speed)
-      self.speedButton.accessibilityLabel = String(describing: self.formatSpeed(speed) + " \("speed_title".localized)")
+      self.playerControlsButton.setCustomTitle(title: self.formatSpeed(speed))
+      self.playerControlsButton.accessibilityLabel = String(describing: self.formatSpeed(speed) + " \("speed_title".localized)")
     }.store(in: &disposeBag)
   }
 }
@@ -331,35 +319,27 @@ extension PlayerViewController {
   func setupToolbar() {
     self.bottomToolbar.setBackgroundImage(UIImage(), forToolbarPosition: .any, barMetrics: .default)
     self.bottomToolbar.setShadowImage(UIImage(), forToolbarPosition: .any)
-    self.speedButton.setTitleTextAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18.0, weight: .semibold)], for: .normal)
+
+    self.playerControlsButton.addTarget(self, action: #selector(setSpeed), for: .touchUpInside)
+    self.playerControlsBarItem = UIBarButtonItem(customView: self.playerControlsButton)
     self.previousChapterButton.accessibilityLabel = "chapters_previous_title".localized
     self.nextChapterButton.accessibilityLabel = "chapters_next_title".localized
     self.bookmarkButton.accessibilityLabel = "bookmark_create_title".localized
-  }
 
-  func updateToolbar(_ showTimerLabel: Bool = false, animated: Bool = false) {
     let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
 
-    var items: [UIBarButtonItem] = [
-      self.speedButton,
-      spacer,
-      self.sleepButton
-    ]
-
-    if showTimerLabel {
-      items.append(self.sleepLabel)
-    }
-
-    items.append(spacer)
-    items.append(self.bookmarkButton)
-
-    items.append(spacer)
-    items.append(self.chaptersButton)
-
-    items.append(spacer)
-    items.append(self.moreButton)
-
-    self.bottomToolbar.setItems(items, animated: animated)
+    self.bottomToolbar.setItems(
+      [
+        self.playerControlsBarItem,
+        spacer,
+        self.bookmarkButton,
+        spacer,
+        self.chaptersButton,
+        spacer,
+        self.moreButton
+      ],
+      animated: false
+    )
   }
 }
 
@@ -374,9 +354,8 @@ extension PlayerViewController {
     self.viewModel.createBookmark(vc: self)
   }
 
-  @IBAction func setSpeed() {
-    let actionSheet = self.viewModel.getSpeedActionSheet()
-    self.present(actionSheet, animated: true, completion: nil)
+  @objc func setSpeed() {
+    self.viewModel.showControls()
   }
 
   @IBAction func setSleepTimer() {

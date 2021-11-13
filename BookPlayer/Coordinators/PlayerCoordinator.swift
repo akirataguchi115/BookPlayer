@@ -51,4 +51,13 @@ class PlayerCoordinator: Coordinator {
     self.childCoordinators.append(chaptersCoordinator)
     chaptersCoordinator.start()
   }
+
+  func showControls() {
+    let playerControlsCoordinator = PlayerControlsCoordinator(navigationController: self.navigationController,
+                                                              playerManager: self.playerManager)
+    playerControlsCoordinator.parentCoordinator = self
+    playerControlsCoordinator.presentingViewController = self.presentingViewController
+    self.childCoordinators.append(playerControlsCoordinator)
+    playerControlsCoordinator.start()
+  }
 }
