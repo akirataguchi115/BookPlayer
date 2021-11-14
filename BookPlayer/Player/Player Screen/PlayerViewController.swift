@@ -351,7 +351,9 @@ extension PlayerViewController {
   }
 
   @IBAction func createBookmark(_ sender: UIBarButtonItem) {
-    self.viewModel.createBookmark(vc: self)
+    let actionSheet = SleepTimer.shared.actionSheet()
+    self.present(actionSheet, animated: true, completion: nil)
+//    self.viewModel.createBookmark(vc: self)
   }
 
   @objc func setSpeed() {
